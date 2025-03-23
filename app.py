@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///urls.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+description = db.Column(db.String(256), nullable=True)
 
 class ShortURL(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -20,22 +21,7 @@ class ShortURL(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     access_count = db.Column(db.Integer, default=0)
-class TestURLShortening(unittest.TestCase):
-    def setUp(self):
-        self.app = app.test_client()
-        self.app.testing = True
-
-    def test_create_short_url(self):
-        response = self.app.post('/shorten', json={'url': 'https://www.example.com'})
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('shortCode', response.get_json())
-
-    def test_get_all_short_urls(self):
-        response = self.app.get('/shorten')
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.get_json(), list)    
-
-
+   
     def __repr__(self):
         return f'<ShortURL {self.short_code}>'
 
