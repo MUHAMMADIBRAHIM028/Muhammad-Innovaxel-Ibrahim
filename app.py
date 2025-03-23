@@ -20,6 +20,21 @@ class ShortURL(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     access_count = db.Column(db.Integer, default=0)
+class TestURLShortening(unittest.TestCase):
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+
+    def test_create_short_url(self):
+        response = self.app.post('/shorten', json={'url': 'https://www.example.com'})
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('shortCode', response.get_json())
+
+    def test_get_all_short_urls(self):
+        response = self.app.get('/shorten')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.get_json(), list)    
+
 
     def __repr__(self):
         return f'<ShortURL {self.short_code}>'
@@ -33,9 +48,11 @@ def generate_short_code(length=6):
 
 @app.route('/shorten', methods=['POST'])
 def create_short_url():
-    data = request.get_json()
-    original_url = data.get('url')
-     logging.info(f"Shortening URL: {original_url} to short code: {short_code}")
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify({'error': 'Invalid JSON format'}), 400
+
 
     # URL validation using the function imported from validators.py
     if not original_url:
