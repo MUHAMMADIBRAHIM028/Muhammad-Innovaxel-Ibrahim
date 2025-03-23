@@ -6,7 +6,8 @@ import string
 
 
 from validators import is_valid_url
-
+import logging
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///urls.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -34,6 +35,7 @@ def generate_short_code(length=6):
 def create_short_url():
     data = request.get_json()
     original_url = data.get('url')
+     logging.info(f"Shortening URL: {original_url} to short code: {short_code}")
 
     # URL validation using the function imported from validators.py
     if not original_url:
